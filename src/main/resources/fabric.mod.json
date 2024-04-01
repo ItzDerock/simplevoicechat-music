@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "simple-voice-chat-music",
+  "version": "${version}",
+  "name": "Simple Voice Chat Music",
+  "description": "This is an example description! Tell everyone what your mod is about!",
+  "authors": [
+    "Derock <derock@derock.dev>"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+  "license": "CC0-1.0",
+  "icon": "assets/simple-voice-chat-music/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.derock.svcmusic.SimpleVoiceChatMusic"
+    ],
+    "voicechat": [
+      "dev.derock.svcmusic.VoiceChatPlugin"
+    ]
+  },
+  "mixins": [
+    "simple-voice-chat-music.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.7",
+    "minecraft": "~1.20.4",
+    "java": ">=17",
+    "fabric-api": "*",
+    "voicechat": ">=1.20.4-2.5.11"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
