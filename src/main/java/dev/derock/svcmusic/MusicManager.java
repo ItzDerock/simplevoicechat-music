@@ -1,5 +1,6 @@
 package dev.derock.svcmusic;
 
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
@@ -25,7 +26,7 @@ public class MusicManager {
         if (groups.containsKey(group.getId())) {
             return groups.get(group.getId());
         } else {
-            GroupManager gm = new GroupManager(group);
+            GroupManager gm = new GroupManager(group, playerManager.createPlayer());
             groups.put(group.getId(), gm);
             return gm;
         }
