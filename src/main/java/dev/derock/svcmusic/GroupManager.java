@@ -4,11 +4,17 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
+import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame;
 import de.maxhenkel.voicechat.api.Group;
 import de.maxhenkel.voicechat.api.ServerPlayer;
 import de.maxhenkel.voicechat.api.VoicechatConnection;
 import de.maxhenkel.voicechat.api.audiochannel.StaticAudioChannel;
 import de.maxhenkel.voicechat.api.audiosender.AudioSender;
+import de.maxhenkel.voicechat.api.events.ClientReceiveSoundEvent;
+import de.maxhenkel.voicechat.api.packets.ConvertablePacket;
+import de.maxhenkel.voicechat.api.packets.Packet;
+import de.maxhenkel.voicechat.api.packets.StaticSoundPacket;
+import net.minecraft.client.sound.StaticSound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -22,14 +28,15 @@ public class GroupManager extends AudioEventAdapter {
     private final AudioPlayer lavaplayer;
     private final MinecraftServer server;
     private final BlockingQueue<AudioTrack> queue;
-    private AudioSender sender;
 
-    private ConcurrentHashMap<UUID, StaticAudioChannel> audioChannels;
+    private ConcurrentHashMap<UUID, StaticAudioChannel> connections;
+    private MutableAudioFrame currentFrame;
 
     public GroupManager(Group group, AudioPlayer player, MinecraftServer server) {
         this.group = group;
         this.server = server;
         this.lavaplayer = player;
+        this.currentFrame = new MutableAudioFrame();
 
         // todo: max queue size
         this.queue = new LinkedBlockingQueue<>();
@@ -38,6 +45,22 @@ public class GroupManager extends AudioEventAdapter {
         player.addListener(this);
 
         // schedule task
+        startGroupTracking();
+        startAudioFrameSending();
+    }
+
+    private void startAudioFrameSending() {
+        ScheduledFuture<?> sendAudioFrames = SimpleVoiceChatMusic.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
+            if (VoiceChatPlugin.voicechatServerApi == null) return;
+            if (lavaplayer.provide(currentFrame)) {
+                for (StaticAudioChannel channel : connections.values()) {
+                    channel.send(currentFrame.getData());
+                }
+            }
+        }, 0L, 20L, TimeUnit.MILLISECONDS);
+    }
+
+    private void startGroupTracking() {
         ScheduledFuture<?> groupPlayerTask = SimpleVoiceChatMusic.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
             if (VoiceChatPlugin.voicechatServerApi == null) return;
 
@@ -48,17 +71,20 @@ public class GroupManager extends AudioEventAdapter {
 
                 if (playerConnection == null || !playerConnection.isConnected()) continue;
                 Group playerGroup = playerConnection.getGroup();
-                if (playerGroup == null || !playerGroup.equals(this.group)) continue;
+                if (playerGroup == null || playerGroup.getId() != this.group.getId()) continue;
 
                 uuids.add(serverPlayer.getUuid());
-                this.audioChannels.computeIfAbsent(serverPlayer.getUuid(), uuid -> {
-                    StaticAudioChannel audioChannel = VoiceChatPlugin.voicechatServerApi.createStaticAudioChannel(
+                SimpleVoiceChatMusic.LOGGER.info("Found " + serverPlayer.getName() + " (" + serverPlayer.getUuid() + ") in group.");
+
+                connections.computeIfAbsent(serverPlayer.getUuid(), (uuid) -> {
+                    return VoiceChatPlugin.voicechatServerApi.createStaticAudioChannel(
                         UUID.randomUUID(),
-                        VoiceChatPlugin.voicechatServerApi.fromServerLevel(serverPlayer.)
-                })
+                        VoiceChatPlugin.voicechatServerApi.fromServerLevel(serverPlayer.getWorld()),
+                        playerConnection
+                    );
+                });
             }
         }, 0L, 100L, TimeUnit.MILLISECONDS);
-
     }
 
     public boolean enqueueSong(AudioTrack track) {

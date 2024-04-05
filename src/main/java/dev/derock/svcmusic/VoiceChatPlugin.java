@@ -4,13 +4,20 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
+import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
 import de.maxhenkel.voicechat.api.VoicechatPlugin;
 import de.maxhenkel.voicechat.api.VoicechatApi;
 import de.maxhenkel.voicechat.api.VoicechatServerApi;
 import de.maxhenkel.voicechat.api.VolumeCategory;
 import de.maxhenkel.voicechat.api.events.EventRegistration;
 import de.maxhenkel.voicechat.api.events.VoicechatServerStartedEvent;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class VoiceChatPlugin implements VoicechatPlugin {
 
@@ -46,6 +53,7 @@ public class VoiceChatPlugin implements VoicechatPlugin {
                 .setDescription("The volume of streamed music.")
                 .build();
 
+        new YoutubeAudioSourceManager(true, null, null);
         voicechatServerApi.registerVolumeCategory(musicVolumeCategory);
     }
 

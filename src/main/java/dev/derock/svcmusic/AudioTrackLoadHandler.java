@@ -6,6 +6,9 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import org.apache.http.HttpEntity;
+
+import java.net.SocketImpl;
 
 public class AudioTrackLoadHandler implements AudioLoadResultHandler {
 
@@ -15,11 +18,11 @@ public class AudioTrackLoadHandler implements AudioLoadResultHandler {
     AudioTrackLoadHandler(ServerCommandSource source, GroupManager group) {
         this.source = source;
         this.group = group;
-
     }
 
     @Override
     public void trackLoaded(AudioTrack track) {
+        SimpleVoiceChatMusic.LOGGER.info("Loaded track: " + track.getInfo().uri);
         group.enqueueSong(track);
 
         if (source != null) {
@@ -31,7 +34,7 @@ public class AudioTrackLoadHandler implements AudioLoadResultHandler {
 
     @Override
     public void playlistLoaded(AudioPlaylist playlist) {
-        playlist.getTracks().forEach(gm::enqueueSong);
+        playlist.getTracks().forEach(group::enqueueSong);
 
         if (source != null) {
             source.sendFeedback(
@@ -43,6 +46,8 @@ public class AudioTrackLoadHandler implements AudioLoadResultHandler {
 
     @Override
     public void noMatches() {
+        SimpleVoiceChatMusic.LOGGER.debug("No matches found.");
+
         if (source != null) {
             source.sendFeedback(
                 () -> Text.literal("No matches found!"),
@@ -54,7 +59,7 @@ public class AudioTrackLoadHandler implements AudioLoadResultHandler {
     @Override
     public void loadFailed(FriendlyException exception) {
         if (!exception.severity.equals(FriendlyException.Severity.COMMON)) {
-            LOGGER.warn("Failed to load track from query: " + query, exception);
+            SimpleVoiceChatMusic.LOGGER.warn("Failed to load track from query", exception);
         }
 
         if (source != null) {

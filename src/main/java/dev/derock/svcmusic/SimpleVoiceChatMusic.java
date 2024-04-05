@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import de.maxhenkel.voicechat.api.Group;
 import de.maxhenkel.voicechat.api.VoicechatConnection;
 import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public class SimpleVoiceChatMusic implements DedicatedServerModInitializer {
+public class SimpleVoiceChatMusic implements ModInitializer {
     // This logger is used to write text to the console and the log file.
     // It is considered best practice to use your mod id as the logger's name.
     // That way, it's clear which mod wrote info, warnings, and errors.
@@ -32,15 +33,16 @@ public class SimpleVoiceChatMusic implements DedicatedServerModInitializer {
     });
 
     @Override
-    public void onInitializeServer() {
+    public void onInitialize() {
         CommandRegistrationCallback.EVENT.register(
             (dispatcher, registryAccess, environment) -> dispatcher.register(
-                CommandManager.literal("dj")
-                    .then(CommandManager.literal("search"))
-                    .then(CommandManager.argument("query", StringArgumentType.greedyString()))
+                CommandManager.literal("music")
+                    .then(CommandManager.literal("search")
+                    .then(CommandManager.argument("query", StringArgumentType.string())
                     .executes(context -> {
                         ServerCommandSource source = context.getSource();
                         final String query = StringArgumentType.getString(context, "query");
+                        LOGGER.debug("Running with " + query);
 
                         if (VoiceChatPlugin.voicechatServerApi == null) {
                             source.sendFeedback(
@@ -80,13 +82,24 @@ public class SimpleVoiceChatMusic implements DedicatedServerModInitializer {
                             return 1;
                         }
 
-                        GroupManager gm = MusicManager.getInstance().getGroup(group);
-                        MusicManager.playerManager.loadItem(query, new AudioTrackLoadHandler(source, gm));
+                        SimpleVoiceChatMusic.SCHEDULED_EXECUTOR.execute(() -> {
+                            GroupManager gm = MusicManager.getInstance().getGroup(group, player.getServer());
+                            LOGGER.debug("Loading song...");
+                            MusicManager.getInstance().playerManager.loadItem(query, new AudioTrackLoadHandler(source, gm));
+                        });
+
+
+                        source.sendFeedback(
+                            () -> Text.literal("Ok"),
+                            false
+                        );
 
                         return 0;
                     })
-            )
+            )))
         );
+
+
 
         LOGGER.info("Loaded Simple Voice Chat Music!");
     }

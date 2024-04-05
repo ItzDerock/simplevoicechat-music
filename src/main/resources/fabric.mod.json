@@ -23,7 +23,6 @@
     ]
   },
   "mixins": [
-    "simple-voice-chat-music.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.15.7",

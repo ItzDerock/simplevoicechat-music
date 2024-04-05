@@ -1,6 +1,7 @@
 plugins {
 	id 'fabric-loom' version '1.5-SNAPSHOT'
 	id 'maven-publish'
+	id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 version = project.mod_version
@@ -44,9 +45,13 @@ dependencies {
 	// These are included in the Fabric API production distribution and allow you to update your mod to the latest modules at a later more convenient time.
 
 	// modImplementation "net.fabricmc.fabric-api:fabric-api-deprecated:${project.fabric_version}"
-  implementation 'dev.arbjerg:lavaplayer:2.1.1'
-  implementation "de.maxhenkel.voicechat:voicechat-api:2.5.0"
+	implementation include('dev.arbjerg:lavaplayer:2.1.1')
+
+	implementation "de.maxhenkel.voicechat:voicechat-api:2.5.0"
 	modRuntimeOnly "maven.modrinth:simple-voice-chat:fabric-1.20.4-2.5.11"
+
+	// https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
+	implementation include(group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.14')
 }
 
 processResources {
@@ -92,4 +97,8 @@ publishing {
 		// The repositories here will be used for publishing your artifact, not for
 		// retrieving dependencies.
 	}
+}
+
+shadowJar {
+	relocate 'org.apache.http', 'dev.derock.svcmusic.httppackage'
 }
