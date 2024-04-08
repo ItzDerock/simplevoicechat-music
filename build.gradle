@@ -45,13 +45,19 @@ dependencies {
 	// These are included in the Fabric API production distribution and allow you to update your mod to the latest modules at a later more convenient time.
 
 	// modImplementation "net.fabricmc.fabric-api:fabric-api-deprecated:${project.fabric_version}"
-	implementation include('dev.arbjerg:lavaplayer:2.1.1')
 
 	implementation "de.maxhenkel.voicechat:voicechat-api:2.5.0"
 	modRuntimeOnly "maven.modrinth:simple-voice-chat:fabric-1.20.4-2.5.11"
+ 
+	implementation include('dev.arbjerg:lavaplayer:2.1.1')
 
 	// https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
-	implementation include(group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.14')
+	// implementation include(group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.14')
+  // include implementation('org.apache.httpcomponents:httpclient:4.5.14')
+
+	shadow ('org.apache.httpcomponents:httpclient:4.5.14')
+	include implementation('org.jsoup:jsoup:1.16.1')
+	include implementation('net.iharder:base64:2.3.8')
 }
 
 processResources {
@@ -100,5 +106,12 @@ publishing {
 }
 
 shadowJar {
-	relocate 'org.apache.http', 'dev.derock.svcmusic.httppackage'
+	configurations = [project.configurations.shadow]
+	archiveClassifier = 'shadow-dev'
+	relocate 'org.apache.http', "dev.derock.svcmusic.apachehttp"
+}
+
+remapJar {
+	dependsOn shadowJar
+	inputFile = shadowJar.archiveFile.get()
 }
