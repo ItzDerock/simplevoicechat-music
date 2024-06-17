@@ -1,7 +1,7 @@
 # Simple Voice Chat Music Player
 
 Enjoy music with your friends. This mod allows you to stream youtube, soundcloud, bandcamp, vimeo, twitch, mp3, flac, wav, m3u, and more into SimpleVoiceChat groups.
-Powered by the lightweight [lavaplayer](https://github.com/sedmelluq/lavaplayer) library.
+Powered by the lightweight [lavaplayer](https://github.com/lavalink-devs/lavaplayer) library.
 
 ## Commands
 
@@ -10,6 +10,8 @@ Powered by the lightweight [lavaplayer](https://github.com/sedmelluq/lavaplayer)
 - `/music now-playing` - Shows the current song
 - `/music queue` - Shows the queue
 - `/music skip` - Skips the current song
+
+Song can be a soundcloud URL, Youtube URL, bandcamp URL, etc or it can be just a search term. By default, it will search on YouTube. You can force it to search on soundcloud by using the query `"scsearch: your search terms"`. Lavaplayer also supports YouTube Music, though it wasn't very reliable in my testing. To search YouTube Music, use the query `"ytmsearch: your search terms"`.
 
 ## Customization
 
