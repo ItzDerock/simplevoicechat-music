@@ -10,6 +10,10 @@ Powered by the lightweight [lavaplayer](https://github.com/lavalink-devs/lavapla
 - `/music now-playing` - Shows the current song
 - `/music queue` - Shows the queue
 - `/music skip` - Skips the current song
+- `/music pause` - Pauses the current song
+- `/music resume` - Resumes the current song
+- `/music stop` - Stops the current song and clears the queue
+- `/music kill` - use when something goes wrong and you want to restart the plugin without restarting the server
 
 Song can be a soundcloud URL, Youtube URL, bandcamp URL, etc or it can be just a search term. By default, it will search on YouTube. You can force it to search on soundcloud by using the query `"scsearch: your search terms"`. Lavaplayer also supports YouTube Music, though it wasn't very reliable in my testing. To search YouTube Music, use the query `"ytmsearch: your search terms"`.
 
