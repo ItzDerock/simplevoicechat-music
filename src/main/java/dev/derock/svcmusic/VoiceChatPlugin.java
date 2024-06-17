@@ -53,7 +53,6 @@ public class VoiceChatPlugin implements VoicechatPlugin {
                 .setDescription("The volume of streamed music.")
                 .build();
 
-        new YoutubeAudioSourceManager(true, null, null);
         voicechatServerApi.registerVolumeCategory(musicVolumeCategory);
     }
 
