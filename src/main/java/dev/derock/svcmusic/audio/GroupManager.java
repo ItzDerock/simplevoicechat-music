@@ -12,6 +12,7 @@ import dev.derock.svcmusic.VoiceChatPlugin;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
@@ -57,6 +58,11 @@ public class GroupManager {
 
         this.audioFrameSendingTask = SimpleVoiceChatMusic.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
             if (VoiceChatPlugin.voicechatServerApi == null) {
+                return;
+            }
+
+            // check if playback is paused
+            if (this.lavaplayer == null || this.lavaplayer.isPaused()) {
                 return;
             }
 
@@ -111,11 +117,7 @@ public class GroupManager {
             // clean up if no players
             if (this.connections.isEmpty()) {
                 SimpleVoiceChatMusic.LOGGER.info("Group {} is now empty. Cleaning up...", this.group.getName());
-                if (this.audioFrameSendingTask != null) this.audioFrameSendingTask.cancel(true);
-                this.lavaplayer.destroy();
-                MusicManager.getInstance().deleteGroup(this.group);
-
-                if (this.playerTrackingTask != null) this.playerTrackingTask.cancel(false);
+                this.cleanup();
             }
 
             // stop if no songs queued
@@ -144,10 +146,16 @@ public class GroupManager {
     public void nextTrack() {
         // poll returns track or null
         // if null, lavaplayer stops
-        lavaplayer.startTrack(queue.poll(), false);
+        AudioTrack track = queue.poll();
+        lavaplayer.startTrack(track, false);
 
         // revive task if needed
-        this.startAudioFrameSending();
+        if (track != null) {
+            this.startAudioFrameSending();
+        } else {
+            // no more songs to play, so quit
+            this.cleanup();
+        }
     }
 
     public AudioPlayer getPlayer() {
@@ -162,5 +170,13 @@ public class GroupManager {
        for (ServerPlayerEntity player : players) {
            player.sendMessage(text);
        }
+    }
+
+    public void cleanup() {
+        this.broadcast(Text.literal("No more songs to play."));
+        if (this.audioFrameSendingTask != null) this.audioFrameSendingTask.cancel(true);
+        this.lavaplayer.destroy();
+        MusicManager.getInstance().deleteGroup(this.group);
+        if (this.playerTrackingTask != null) this.playerTrackingTask.cancel(false);
     }
 }

@@ -33,6 +33,10 @@ public class SimpleVoiceChatMusic implements ModInitializer {
         CommandRegistrationCallback.EVENT.register(SkipCommand::register);
         CommandRegistrationCallback.EVENT.register(PlayCommand::register);
         CommandRegistrationCallback.EVENT.register(QueueCommand::register);
+        CommandRegistrationCallback.EVENT.register(PauseCommand::register);
+        CommandRegistrationCallback.EVENT.register(ResumeCommand::register);
+        CommandRegistrationCallback.EVENT.register(StopCommand::register);
+        CommandRegistrationCallback.EVENT.register(KillCommand::register);
 
         LOGGER.info("Loaded Simple Voice Chat Music!");
     }
