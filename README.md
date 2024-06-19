@@ -21,6 +21,11 @@ https://github.com/ItzDerock/simplevoicechat-music/assets/14848722/c974d7a7-26a7
 
 Song can be a soundcloud URL, Youtube URL, bandcamp URL, etc or it can be just a search term. By default, it will search on YouTube. You can force it to search on soundcloud by using the query `"scsearch: your search terms"`. Lavaplayer also supports YouTube Music, though it wasn't very reliable in my testing. To search YouTube Music, use the query `"ytmsearch: your search terms"`.
 
+## Support
+
+Join my [discord server](https://discord.gg/qTTynxnUZe) and select simple voice chat in the onboarding flow.  
+This server is my open-source project "hub" so you may see unrelated channels. Make sure you post your question in the correct category!
+
 ## Customization
 
 Currently, no options are customizable as this was made for private use, but I thought I'd open-source it since
