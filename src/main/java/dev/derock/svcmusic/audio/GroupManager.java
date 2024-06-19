@@ -1,5 +1,7 @@
 package dev.derock.svcmusic.audio;
 
+import com.mojang.serialization.Decoder;
+import com.sedmelluq.discord.lavaplayer.filter.equalizer.EqualizerFactory;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame;
@@ -21,6 +23,24 @@ import java.util.UUID;
 import java.util.concurrent.*;
 
 public class GroupManager {
+    private static final float[] BASS_BOOST = {
+        0.2f,
+        0.15f,
+        0.1f,
+        0.05f,
+        0.0f,
+        -0.05f,
+        -0.1f,
+        -0.1f,
+        -0.1f,
+        -0.1f,
+        -0.1f,
+        -0.1f,
+        -0.1f,
+        -0.1f,
+        -0.1f
+    };
+
     private final Group group;
     private final AudioPlayer lavaplayer;
     private final MinecraftServer server;
@@ -30,12 +50,18 @@ public class GroupManager {
     private final MutableAudioFrame currentFrame;
     private @Nullable ScheduledFuture<?> audioFrameSendingTask = null;
     private @Nullable ScheduledFuture<?> playerTrackingTask = null;
+    private final EqualizerFactory equalizer = new EqualizerFactory();
 
     public GroupManager(Group group, AudioPlayer player, MinecraftServer server) {
         this.group = group;
         this.server = server;
         this.lavaplayer = player;
         this.currentFrame = new MutableAudioFrame();
+
+        // apply EQ
+        this.lavaplayer.setFilterFactory(this.equalizer);
+        this.lavaplayer.setFrameBufferDuration(500);
+
         ByteBuffer buffer = ByteBuffer.allocate(1024);
         currentFrame.setBuffer(buffer);
 
@@ -51,11 +77,20 @@ public class GroupManager {
     }
 
     private void startAudioFrameSending() {
+        if (this.audioFrameSendingTask != null && !this.audioFrameSendingTask.isDone()) {
+            // already started, so leave it.
+            SimpleVoiceChatMusic.LOGGER.info("Not starting new task");
+            return;
+        }
+
         if (this.audioFrameSendingTask != null && this.audioFrameSendingTask.isDone()) {
             // stop and restart
+            // this.audioFrameSendingTask.cancel(true);
+            SimpleVoiceChatMusic.LOGGER.warn("Frame task in stuck state!");
             this.audioFrameSendingTask.cancel(true);
         }
 
+        SimpleVoiceChatMusic.LOGGER.info("Starting new audio frame sending task.");
         this.audioFrameSendingTask = SimpleVoiceChatMusic.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
             if (VoiceChatPlugin.voicechatServerApi == null) {
                 return;
@@ -178,5 +213,13 @@ public class GroupManager {
         this.lavaplayer.destroy();
         MusicManager.getInstance().deleteGroup(this.group);
         if (this.playerTrackingTask != null) this.playerTrackingTask.cancel(false);
+    }
+
+    public void setBassBoost(float percentage) {
+        final float multiplier = percentage / 100.00f;
+
+        for (int i = 0; i < BASS_BOOST.length; i++) {
+            this.equalizer.setGain(i, BASS_BOOST[i] * multiplier);
+        }
     }
 }

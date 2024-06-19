@@ -28,6 +28,8 @@ public class SimpleVoiceChatMusic implements ModInitializer {
 
     @Override
     public void onInitialize() {
+
+
         CommandRegistrationCallback.EVENT.register(SearchCommand::register);
         CommandRegistrationCallback.EVENT.register(NowPlayingCommand::register);
         CommandRegistrationCallback.EVENT.register(SkipCommand::register);
@@ -37,6 +39,8 @@ public class SimpleVoiceChatMusic implements ModInitializer {
         CommandRegistrationCallback.EVENT.register(ResumeCommand::register);
         CommandRegistrationCallback.EVENT.register(StopCommand::register);
         CommandRegistrationCallback.EVENT.register(KillCommand::register);
+        CommandRegistrationCallback.EVENT.register(VolumeCommand::register);
+        CommandRegistrationCallback.EVENT.register(BassboostCommand::register);
 
         LOGGER.info("Loaded Simple Voice Chat Music!");
     }

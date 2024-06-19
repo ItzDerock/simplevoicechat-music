@@ -21,6 +21,9 @@ public class MusicManager {
         SimpleVoiceChatMusic.LOGGER.info("Loading sources...");
         this.playerManager = new DefaultAudioPlayerManager();
 
+        // allow hotswapping EQ levels
+        this.playerManager.getConfiguration().setFilterHotSwapEnabled(true);
+
         AudioSourceManagers.registerRemoteSources(
             this.playerManager,
             // we will load v2 of yt music player
