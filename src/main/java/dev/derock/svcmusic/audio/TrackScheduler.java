@@ -24,8 +24,6 @@ public class TrackScheduler extends AudioEventAdapter {
 
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-        SimpleVoiceChatMusic.LOGGER.info("Track {} ended with reason {}", track.getIdentifier(), endReason.name());
-
         // only start next if applicable
         if (endReason.mayStartNext) {
             this.group.nextTrack();

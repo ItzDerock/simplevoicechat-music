@@ -1,9 +1,11 @@
 package dev.derock.svcmusic;
 
-import com.mojang.brigadier.Command;
+import dev.derock.svcmusic.audio.MusicManager;
 import dev.derock.svcmusic.commands.*;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,9 +21,9 @@ public class SimpleVoiceChatMusic implements ModInitializer {
     public static ScheduledExecutorService SCHEDULED_EXECUTOR = Executors.newScheduledThreadPool(1, r -> {
         Thread thread = new Thread(r, "SVCMusicExecutor");
         thread.setDaemon(true);
-        thread.setUncaughtExceptionHandler((t, e) -> {
-            SimpleVoiceChatMusic.LOGGER.error("Uncaught exception in thread {}", t.getName(), e);
-        });
+        thread.setUncaughtExceptionHandler(
+            (t, e) -> SimpleVoiceChatMusic.LOGGER.error("Uncaught exception in thread {}", t.getName(), e)
+        );
 
         return thread;
     });
@@ -39,6 +41,11 @@ public class SimpleVoiceChatMusic implements ModInitializer {
         CommandRegistrationCallback.EVENT.register(KillCommand::register);
         CommandRegistrationCallback.EVENT.register(VolumeCommand::register);
         CommandRegistrationCallback.EVENT.register(BassboostCommand::register);
+
+        ServerLifecycleEvents.SERVER_STOPPING.register((MinecraftServer server) -> {
+            LOGGER.info("Cleaning up due to shutdown.");
+            MusicManager.getInstance().cleanup();
+        });
 
         LOGGER.info("Loaded Simple Voice Chat Music!");
     }

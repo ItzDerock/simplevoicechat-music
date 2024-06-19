@@ -1,13 +1,11 @@
 package dev.derock.svcmusic.audio;
 
-import com.mojang.serialization.Decoder;
 import com.sedmelluq.discord.lavaplayer.filter.equalizer.EqualizerFactory;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame;
 import de.maxhenkel.voicechat.api.Group;
 import de.maxhenkel.voicechat.api.VoicechatConnection;
-import de.maxhenkel.voicechat.api.VolumeCategory;
 import de.maxhenkel.voicechat.api.audiochannel.StaticAudioChannel;
 import dev.derock.svcmusic.SimpleVoiceChatMusic;
 import dev.derock.svcmusic.VoiceChatPlugin;
@@ -22,25 +20,9 @@ import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.*;
 
-public class GroupManager {
-    private static final float[] BASS_BOOST = {
-        0.2f,
-        0.15f,
-        0.1f,
-        0.05f,
-        0.0f,
-        -0.05f,
-        -0.1f,
-        -0.1f,
-        -0.1f,
-        -0.1f,
-        -0.1f,
-        -0.1f,
-        -0.1f,
-        -0.1f,
-        -0.1f
-    };
+import static dev.derock.svcmusic.util.Constants.BASS_BOOST;
 
+public class GroupManager {
     private final Group group;
     private final AudioPlayer lavaplayer;
     private final MinecraftServer server;
@@ -48,9 +30,19 @@ public class GroupManager {
 
     private final ConcurrentHashMap<UUID, StaticAudioChannel> connections = new ConcurrentHashMap<>();
     private final MutableAudioFrame currentFrame;
+    private final EqualizerFactory equalizer = new EqualizerFactory();
+
     private @Nullable ScheduledFuture<?> audioFrameSendingTask = null;
     private @Nullable ScheduledFuture<?> playerTrackingTask = null;
-    private final EqualizerFactory equalizer = new EqualizerFactory();
+    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread thread = new Thread(r, "SVCGroupMusicExecutor");
+        thread.setDaemon(true);
+        thread.setUncaughtExceptionHandler(
+            (t, e) -> SimpleVoiceChatMusic.LOGGER.error("Uncaught exception in thread {}", t.getName(), e)
+        );
+
+        return thread;
+    });
 
     public GroupManager(Group group, AudioPlayer player, MinecraftServer server) {
         this.group = group;
@@ -90,7 +82,7 @@ public class GroupManager {
         }
 
         SimpleVoiceChatMusic.LOGGER.info("Starting new audio frame sending task.");
-        this.audioFrameSendingTask = SimpleVoiceChatMusic.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
+        this.audioFrameSendingTask = this.executorService.scheduleAtFixedRate(() -> {
             if (VoiceChatPlugin.voicechatServerApi == null) {
                 return;
             }
@@ -100,18 +92,16 @@ public class GroupManager {
                 return;
             }
 
-            try {
-                if (lavaplayer.provide(this.currentFrame, 20, TimeUnit.MILLISECONDS)) {
-                    for (StaticAudioChannel channel : connections.values()) {
-                        channel.send(this.currentFrame.getData());
-                    }
+            if (lavaplayer.provide(this.currentFrame)) {
+                for (StaticAudioChannel channel : connections.values()) {
+                    channel.send(this.currentFrame.getData());
                 }
-            } catch (TimeoutException | InterruptedException ignored) {}
+            }
         }, 1000L, 20L, TimeUnit.MILLISECONDS);
     }
 
     private void startGroupTracking() {
-        this.playerTrackingTask = SimpleVoiceChatMusic.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
+        this.playerTrackingTask = executorService.scheduleAtFixedRate(() -> {
             if (VoiceChatPlugin.voicechatServerApi == null) return;
 
             HashSet<UUID> uuids = new HashSet<>();
@@ -178,22 +168,21 @@ public class GroupManager {
     }
 
     public void nextTrack() {
-        SimpleVoiceChatMusic.LOGGER.info("Replacing {}", this.lavaplayer.getPlayingTrack());
+        // ensure this happens in the correct thread
+        this.executorService.execute(() -> {
+            // poll returns track or null
+            // if null, lavaplayer stops
+            AudioTrack track = queue.poll();
+            lavaplayer.startTrack(track, false);
 
-        // poll returns track or null
-        // if null, lavaplayer stops
-        AudioTrack track = queue.poll();
-        boolean played = lavaplayer.startTrack(track, false);
-
-        SimpleVoiceChatMusic.LOGGER.info("Attempting to play: {} -> {}", track == null ? "null" : track.getInfo().uri, played);
-
-        // revive task if needed
-        if (track != null) {
-            this.startAudioFrameSending();
-        } else {
-            // no more songs to play, so quit
-            this.cleanup();
-        }
+            // revive task if needed
+            if (track != null) {
+                this.startAudioFrameSending();
+            } else {
+                // no more songs to play, so quit
+                this.cleanup();
+            }
+        });
     }
 
     public AudioPlayer getPlayer() {
@@ -201,13 +190,16 @@ public class GroupManager {
     }
 
     public void broadcast(MutableText text) {
-        ServerPlayerEntity[] players = server.getPlayerManager().getPlayerList().stream().filter(
-            (player) -> this.connections.containsKey(player.getUuid())
-        ).toArray(ServerPlayerEntity[]::new);
+        // execute on main thread
+        server.execute(() -> {
+            ServerPlayerEntity[] players = server.getPlayerManager().getPlayerList().stream().filter(
+                (player) -> this.connections.containsKey(player.getUuid())
+            ).toArray(ServerPlayerEntity[]::new);
 
-       for (ServerPlayerEntity player : players) {
-           player.sendMessage(text);
-       }
+            for (ServerPlayerEntity player : players) {
+                player.sendMessage(text);
+            }
+        });
     }
 
     public void cleanup() {
@@ -216,6 +208,7 @@ public class GroupManager {
         this.lavaplayer.destroy();
         MusicManager.getInstance().deleteGroup(this.group);
         if (this.playerTrackingTask != null) this.playerTrackingTask.cancel(false);
+        this.executorService.shutdown();
     }
 
     public void setBassBoost(float percentage) {

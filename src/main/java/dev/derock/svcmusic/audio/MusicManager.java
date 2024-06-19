@@ -1,6 +1,5 @@
 package dev.derock.svcmusic.audio;
 
-import com.mojang.datafixers.kinds.IdF;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
@@ -51,5 +50,16 @@ public class MusicManager {
 
     public GroupManager deleteGroup(Group group) {
         return groups.remove(group.getId());
+    }
+
+    /**
+     * Destroys all groups
+     */
+    public void cleanup() {
+        for (GroupManager gm : groups.values()) {
+            gm.cleanup();
+        }
+
+        groups.clear();
     }
 }
