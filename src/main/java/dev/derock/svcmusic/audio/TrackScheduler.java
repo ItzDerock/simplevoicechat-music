@@ -19,12 +19,13 @@ public class TrackScheduler extends AudioEventAdapter {
 
     @Override
     public void onTrackStart(AudioPlayer player, AudioTrack track) {
-        this.group.broadcast(Text.literal("Now playing: ").append(
-            ModUtils.hyperlink(track.getInfo().title + " by " + track.getInfo().author, track.getInfo().uri)));
+        this.group.broadcast(Text.literal("Now playing: ").append(ModUtils.trackInfo(track.getInfo())));
     }
 
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
+        SimpleVoiceChatMusic.LOGGER.info("Track {} ended with reason {}", track.getIdentifier(), endReason.name());
+
         // only start next if applicable
         if (endReason.mayStartNext) {
             this.group.nextTrack();
@@ -33,11 +34,11 @@ public class TrackScheduler extends AudioEventAdapter {
 
     @Override
     public void onTrackException(AudioPlayer player, AudioTrack track, FriendlyException exception) {
-        SimpleVoiceChatMusic.LOGGER.error(exception.getMessage());
-
         if (exception.severity == FriendlyException.Severity.COMMON) {
+            SimpleVoiceChatMusic.LOGGER.warn("Failed to play {} due to error: {}", track.getInfo().title, exception.getMessage());
             this.group.broadcast(Text.literal("Failed to play song: " + exception.getMessage()));
         } else {
+            SimpleVoiceChatMusic.LOGGER.error("Failed to play {} due to error: {}", track.getInfo().title, exception.getMessage());
             this.group.broadcast(Text.literal("Failed to play song due to an internal error."));
         }
 

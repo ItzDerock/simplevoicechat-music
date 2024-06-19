@@ -79,14 +79,13 @@ public class GroupManager {
     private void startAudioFrameSending() {
         if (this.audioFrameSendingTask != null && !this.audioFrameSendingTask.isDone()) {
             // already started, so leave it.
-            SimpleVoiceChatMusic.LOGGER.info("Not starting new task");
+            SimpleVoiceChatMusic.LOGGER.info("Not starting new audio frame sending task.");
             return;
         }
 
         if (this.audioFrameSendingTask != null && this.audioFrameSendingTask.isDone()) {
             // stop and restart
-            // this.audioFrameSendingTask.cancel(true);
-            SimpleVoiceChatMusic.LOGGER.warn("Frame task in stuck state!");
+            SimpleVoiceChatMusic.LOGGER.info("Frame task in stuck state, attempting to revive");
             this.audioFrameSendingTask.cancel(true);
         }
 
@@ -97,7 +96,7 @@ public class GroupManager {
             }
 
             // check if playback is paused
-            if (this.lavaplayer == null || this.lavaplayer.isPaused()) {
+            if (this.lavaplayer == null || this.lavaplayer.isPaused() || this.lavaplayer.getPlayingTrack() == null) {
                 return;
             }
 
@@ -179,10 +178,14 @@ public class GroupManager {
     }
 
     public void nextTrack() {
+        SimpleVoiceChatMusic.LOGGER.info("Replacing {}", this.lavaplayer.getPlayingTrack());
+
         // poll returns track or null
         // if null, lavaplayer stops
         AudioTrack track = queue.poll();
-        lavaplayer.startTrack(track, false);
+        boolean played = lavaplayer.startTrack(track, false);
+
+        SimpleVoiceChatMusic.LOGGER.info("Attempting to play: {} -> {}", track == null ? "null" : track.getInfo().uri, played);
 
         // revive task if needed
         if (track != null) {

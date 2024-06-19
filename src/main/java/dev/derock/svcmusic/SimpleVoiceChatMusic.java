@@ -28,8 +28,6 @@ public class SimpleVoiceChatMusic implements ModInitializer {
 
     @Override
     public void onInitialize() {
-
-
         CommandRegistrationCallback.EVENT.register(SearchCommand::register);
         CommandRegistrationCallback.EVENT.register(NowPlayingCommand::register);
         CommandRegistrationCallback.EVENT.register(SkipCommand::register);
