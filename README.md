@@ -3,7 +3,7 @@
 Enjoy music with your friends. This mod allows you to stream youtube, soundcloud, bandcamp, vimeo, twitch, mp3, flac, wav, m3u, and more into SimpleVoiceChat groups.
 Powered by the lightweight [lavaplayer](https://github.com/lavalink-devs/lavaplayer) library.
 
-
+https://github.com/ItzDerock/simplevoicechat-music/assets/14848722/c974d7a7-26a7-44b9-9c8a-b6d6722a8582
 
 ## Commands
 
