@@ -27,6 +27,7 @@ public class GroupManager {
     private final AudioPlayer lavaplayer;
     private final MinecraftServer server;
     private final BlockingQueue<AudioTrack> queue;
+    private final GroupSettingsManager settingsStore;
 
     private final ConcurrentHashMap<UUID, StaticAudioChannel> connections = new ConcurrentHashMap<>();
     private final MutableAudioFrame currentFrame;
@@ -49,11 +50,13 @@ public class GroupManager {
         this.server = server;
         this.lavaplayer = player;
         this.currentFrame = new MutableAudioFrame();
+        this.settingsStore = GroupSettingsManager.getGroup(group);
 
         // apply EQ
         this.lavaplayer.setFilterFactory(this.equalizer);
         this.lavaplayer.setFrameBufferDuration(500);
 
+        // buffer for storing current opus frame
         ByteBuffer buffer = ByteBuffer.allocate(1024);
         currentFrame.setBuffer(buffer);
 
@@ -66,6 +69,10 @@ public class GroupManager {
         // schedule task
         startGroupTracking();
         startAudioFrameSending();
+
+        // restore settings
+        this.setVolume(this.settingsStore.volume);
+        this.setBassBoost(this.settingsStore.bassboost);
     }
 
     private void startAudioFrameSending() {
@@ -212,10 +219,20 @@ public class GroupManager {
     }
 
     public void setBassBoost(float percentage) {
+        this.settingsStore.bassboost = percentage;
         final float multiplier = percentage / 100.00f;
 
         for (int i = 0; i < BASS_BOOST.length; i++) {
             this.equalizer.setGain(i, BASS_BOOST[i] * multiplier);
         }
+    }
+
+    public void setVolume(int volume) {
+        this.settingsStore.volume = volume;
+        this.getPlayer().setVolume(volume);
+    }
+
+    public final GroupSettingsManager getSettingsStore() {
+        return this.settingsStore;
     }
 }

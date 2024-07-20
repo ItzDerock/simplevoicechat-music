@@ -31,7 +31,7 @@ public class VolumeCommand {
         SimpleVoiceChatMusic.SCHEDULED_EXECUTOR.execute(() -> {
             GroupManager gm = MusicManager.getInstance().getGroup(result.group(), result.player().getServer());
             gm.broadcast(Text.literal("Volume set to " + volume + "% by " + result.source().getName()));
-            gm.getPlayer().setVolume(volume);
+            gm.setVolume(volume);
         });
 
         return 0;
