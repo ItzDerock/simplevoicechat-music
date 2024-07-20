@@ -46,11 +46,14 @@ public class ModUtils {
     }
 
     public static String formatMMSS(long millis) {
+        String seconds = Long.valueOf(TimeUnit.MILLISECONDS.toSeconds(millis) -
+                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))).toString();
 
-        return String.format("%d:%d",
+        if (seconds.length() == 1) seconds = "0" + seconds;
+
+        return String.format("%d:%s",
             TimeUnit.MILLISECONDS.toMinutes(millis),
-            TimeUnit.MILLISECONDS.toSeconds(millis) -
-                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
+            seconds
         );
     }
 
