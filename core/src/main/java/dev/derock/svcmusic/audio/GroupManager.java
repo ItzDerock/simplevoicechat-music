@@ -9,11 +9,7 @@ import de.maxhenkel.voicechat.api.VoicechatConnection;
 import de.maxhenkel.voicechat.api.audiochannel.StaticAudioChannel;
 import dev.derock.svcmusic.SimpleVoiceChatMusic;
 import dev.derock.svcmusic.VoiceChatPlugin;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import org.jetbrains.annotations.Nullable;
+import dev.derock.svcmusic.api.MinecraftServer;
 
 import java.nio.ByteBuffer;
 import java.util.HashSet;

@@ -1,0 +1,34 @@
+plugins {
+  id 'java-library'
+}
+
+repositories {
+  mavenCentral()
+  maven { url "https://jitpack.io" }
+  maven { url = 'https://maven.maxhenkel.de/repository/public' }
+  maven { url = "https://maven.lavalink.dev/releases" }
+
+  maven {
+    name = "Modrinth"
+    url = "https://api.modrinth.com/maven"
+    content {
+      includeGroup "maven.modrinth"
+    }
+  }
+}
+
+dependencies {
+  // simple voice chat
+  implementation "de.maxhenkel.voicechat:voicechat-api:2.5.0"
+
+  // lavaplayer
+  implementation 'dev.arbjerg:lavaplayer:2.2.1'
+  implementation 'dev.lavalink.youtube:v2:1.4.0'
+
+  // Apache HttpClient dependency
+  implementation 'org.apache.httpcomponents:httpclient:4.5.14'
+
+  // Additional dependencies
+  implementation 'org.jsoup:jsoup:1.16.1'
+  implementation 'net.iharder:base64:2.3.8'
+}
