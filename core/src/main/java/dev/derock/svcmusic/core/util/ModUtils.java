@@ -1,10 +1,10 @@
-package dev.derock.svcmusic.util;
+package dev.derock.svcmusic.core.util;
 
 import com.mojang.brigadier.context.CommandContext;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import de.maxhenkel.voicechat.api.Group;
 import de.maxhenkel.voicechat.api.VoicechatConnection;
-import dev.derock.svcmusic.VoiceChatPlugin;
+import dev.derock.svcmusic.core.VoiceChatPlugin;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.*;

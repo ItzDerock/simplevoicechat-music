@@ -1,7 +1,8 @@
-package dev.derock.svcmusic;
+package dev.derock.svcmusic.core;
 
-import dev.derock.svcmusic.audio.MusicManager;
+import dev.derock.svcmusic.core.audio.MusicManager;
 import dev.derock.svcmusic.commands.*;
+import dev.derock.svcmusic.core.commands.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,9 +1,9 @@
-package dev.derock.svcmusic.audio;
+package dev.derock.svcmusic.core.audio;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import net.minecraft.server.command.ServerCommandSource;
 
-public class PlayLoadHandler extends SearchLoadHandler{
+public class PlayLoadHandler extends SearchLoadHandler {
     public PlayLoadHandler(ServerCommandSource source, GroupManager group) {
         super(source, group);
     }

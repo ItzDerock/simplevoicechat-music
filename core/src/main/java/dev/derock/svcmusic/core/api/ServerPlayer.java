@@ -1,4 +1,4 @@
-package dev.derock.svcmusic.api;
+package dev.derock.svcmusic.core.api;
 
 import java.util.UUID;
 

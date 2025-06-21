@@ -1,4 +1,4 @@
-package dev.derock.svcmusic.util;
+package dev.derock.svcmusic.core.util;
 
 public class Constants {
     public static final float[] BASS_BOOST = {

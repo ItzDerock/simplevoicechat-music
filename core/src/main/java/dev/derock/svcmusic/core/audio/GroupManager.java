@@ -1,4 +1,4 @@
-package dev.derock.svcmusic.audio;
+package dev.derock.svcmusic.core.audio;
 
 import com.sedmelluq.discord.lavaplayer.filter.equalizer.EqualizerFactory;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -7,18 +7,23 @@ import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame;
 import de.maxhenkel.voicechat.api.Group;
 import de.maxhenkel.voicechat.api.VoicechatConnection;
 import de.maxhenkel.voicechat.api.audiochannel.StaticAudioChannel;
-import dev.derock.svcmusic.SimpleVoiceChatMusic;
-import dev.derock.svcmusic.VoiceChatPlugin;
-import dev.derock.svcmusic.api.MinecraftServer;
+import dev.derock.svcmusic.core.SimpleVoiceChatMusic;
+import dev.derock.svcmusic.core.VoiceChatPlugin;
+import dev.derock.svcmusic.core.api.MinecraftServer;
 
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.*;
 
-import static dev.derock.svcmusic.util.Constants.BASS_BOOST;
+import static dev.derock.svcmusic.core.util.Constants.BASS_BOOST;
 
 public class GroupManager {
+    // constants
+    private static final long AUDIO_FRAME_INTERVAL = 20L;
+    private static final long PLAYER_TRACK_INTERVAL = 100L;
+
+    // instance variables
     private final Group group;
     private final AudioPlayer lavaplayer;
     private final MinecraftServer server;
@@ -71,6 +76,10 @@ public class GroupManager {
         this.setBassBoost(this.settingsStore.bassboost);
     }
 
+    /**
+     * This task handles sending opus frames to all players in the group.
+     * Runs ever AUDIO_FRAME_INTERVAL milliseconds.
+     */
     private void startAudioFrameSending() {
         if (this.audioFrameSendingTask != null && !this.audioFrameSendingTask.isDone()) {
             // already started, so leave it.
@@ -100,9 +109,15 @@ public class GroupManager {
                     channel.send(this.currentFrame.getData());
                 }
             }
-        }, 1000L, 20L, TimeUnit.MILLISECONDS);
+        }, 1000L, AUDIO_FRAME_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * Tracks the players in the group, creating a static audio channel for each player.
+     * Runs every PLAYER_TRACK_INTERVAL milliseconds.
+     *
+     * @todo Look into mixins and make this event-driven rather than polling.
+     */
     private void startGroupTracking() {
         this.playerTrackingTask = executorService.scheduleAtFixedRate(() -> {
             if (VoiceChatPlugin.voicechatServerApi == null) return;
@@ -153,7 +168,7 @@ public class GroupManager {
             //     this.audioFrameSendingTask.cancel(false);
             //     this.audioFrameSendingTask = null;
             // }
-        }, 0L, 100L, TimeUnit.MILLISECONDS);
+        }, 0L, PLAYER_TRACK_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
     public boolean enqueueSong(AudioTrack track) {

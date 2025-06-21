@@ -1,11 +1,11 @@
-package dev.derock.svcmusic.audio;
+package dev.derock.svcmusic.core.audio;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import dev.derock.svcmusic.SimpleVoiceChatMusic;
-import dev.derock.svcmusic.util.ModUtils;
+import dev.derock.svcmusic.core.SimpleVoiceChatMusic;
+import dev.derock.svcmusic.core.util.ModUtils;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.MutableText;

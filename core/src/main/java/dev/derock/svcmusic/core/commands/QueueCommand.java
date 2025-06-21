@@ -1,13 +1,13 @@
-package dev.derock.svcmusic.commands;
+package dev.derock.svcmusic.core.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import dev.derock.svcmusic.SimpleVoiceChatMusic;
-import dev.derock.svcmusic.audio.GroupManager;
-import dev.derock.svcmusic.audio.MusicManager;
-import dev.derock.svcmusic.util.ModUtils;
+import dev.derock.svcmusic.core.SimpleVoiceChatMusic;
+import dev.derock.svcmusic.core.audio.GroupManager;
+import dev.derock.svcmusic.core.audio.MusicManager;
+import dev.derock.svcmusic.core.util.ModUtils;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -18,7 +18,7 @@ import net.minecraft.text.Text;
 
 import java.util.concurrent.BlockingQueue;
 
-import static dev.derock.svcmusic.util.ModUtils.checkPlayerGroup;
+import static dev.derock.svcmusic.core.util.ModUtils.checkPlayerGroup;
 
 public class QueueCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {

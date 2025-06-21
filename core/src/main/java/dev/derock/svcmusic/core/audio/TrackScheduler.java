@@ -1,12 +1,12 @@
-package dev.derock.svcmusic.audio;
+package dev.derock.svcmusic.core.audio;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
-import dev.derock.svcmusic.SimpleVoiceChatMusic;
-import dev.derock.svcmusic.util.ModUtils;
+import dev.derock.svcmusic.core.SimpleVoiceChatMusic;
+import dev.derock.svcmusic.core.util.ModUtils;
 import net.minecraft.text.Text;
 
 public class TrackScheduler extends AudioEventAdapter {

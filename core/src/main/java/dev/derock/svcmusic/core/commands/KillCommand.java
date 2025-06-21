@@ -1,12 +1,12 @@
-package dev.derock.svcmusic.commands;
+package dev.derock.svcmusic.core.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import dev.derock.svcmusic.SimpleVoiceChatMusic;
-import dev.derock.svcmusic.audio.GroupManager;
-import dev.derock.svcmusic.audio.MusicManager;
-import dev.derock.svcmusic.util.ModUtils;
+import dev.derock.svcmusic.core.SimpleVoiceChatMusic;
+import dev.derock.svcmusic.core.audio.GroupManager;
+import dev.derock.svcmusic.core.audio.MusicManager;
+import dev.derock.svcmusic.core.util.ModUtils;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -17,7 +17,7 @@ import net.minecraft.util.Formatting;
 import java.util.HashSet;
 import java.util.UUID;
 
-import static dev.derock.svcmusic.util.ModUtils.checkPlayerGroup;
+import static dev.derock.svcmusic.core.util.ModUtils.checkPlayerGroup;
 
 public class KillCommand {
     private static HashSet<UUID> warned = new HashSet<>();

@@ -1,4 +1,4 @@
-package dev.derock.svcmusic.audio;
+package dev.derock.svcmusic.core.audio;
 
 import de.maxhenkel.voicechat.api.Group;
 

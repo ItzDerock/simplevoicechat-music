@@ -1,22 +1,31 @@
-package dev.derock.svcmusic.audio;
+package dev.derock.svcmusic.core.audio;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import de.maxhenkel.voicechat.api.Group;
-import dev.derock.svcmusic.SimpleVoiceChatMusic;
+import dev.derock.svcmusic.core.SimpleVoiceChatMusic;
+import dev.derock.svcmusic.core.api.MinecraftServer;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
-import net.minecraft.server.MinecraftServer;
 
 import java.util.HashMap;
 import java.util.UUID;
 
+/**
+ * Singleton that handles all groups of a server.
+ */
 public class MusicManager {
+    // Singleton instance
     private static final MusicManager instance = new MusicManager();
+
+    // Instance variables
     public AudioPlayerManager playerManager;
     private final HashMap<UUID, GroupManager> groups = new HashMap<>();
 
-    public MusicManager() {
+    /**
+     * Creates a new MusicManager instance.
+     */
+    private MusicManager() {
         SimpleVoiceChatMusic.LOGGER.info("Loading sources...");
         this.playerManager = new DefaultAudioPlayerManager();
 
