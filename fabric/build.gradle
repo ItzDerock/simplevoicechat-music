@@ -1,0 +1,45 @@
+plugins {
+  id 'fabric-loom' version '1.6-SNAPSHOT'
+  id 'maven-publish'
+  id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+repositories {
+  mavenCentral()
+  maven { url "https://jitpack.io" }
+  maven { url = 'https://maven.maxhenkel.de/repository/public' }
+  maven { url = "https://maven.lavalink.dev/releases" }
+
+  maven {
+    name = "Modrinth"
+    url = "https://api.modrinth.com/maven"
+    content {
+      includeGroup "maven.modrinth"
+    }
+  }
+}
+
+dependencies {
+  // To change the versions see the gradle.properties file
+  minecraft "com.mojang:minecraft:${project.minecraft_version}"
+  mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+  modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+  // Fabric API. This is technically optional, but you probably want it anyway.
+  modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+  // simple voice chat
+  implementation "de.maxhenkel.voicechat:voicechat-api:2.5.0"
+  modRuntimeOnly "maven.modrinth:simple-voice-chat:fabric-1.21-2.5.16"
+
+  // lavaplayer
+  implementation 'dev.arbjerg:lavaplayer:2.2.1'
+  implementation 'dev.lavalink.youtube:v2:1.4.0'
+
+  // Apache HttpClient dependency
+  implementation 'org.apache.httpcomponents:httpclient:4.5.14'
+
+  // Additional dependencies
+  include 'org.jsoup:jsoup:1.16.1'
+  include 'net.iharder:base64:2.3.8'
+}

@@ -1,0 +1,41 @@
+package dev.derock.svcmusic.core.commands;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.derock.svcmusic.core.SimpleVoiceChatMusic;
+import dev.derock.svcmusic.core.audio.GroupManager;
+import dev.derock.svcmusic.core.audio.MusicManager;
+import dev.derock.svcmusic.core.util.ModUtils;
+import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
+
+import static dev.derock.svcmusic.core.util.ModUtils.checkPlayerGroup;
+
+public class BassboostCommand {
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
+        dispatcher.register(CommandManager.literal("music")
+            .then(CommandManager.literal("bassboost")
+                .then(CommandManager.argument("bass_percent", FloatArgumentType.floatArg(0, 200))
+                    .executes(BassboostCommand::execute))));
+    }
+
+    public static int execute(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        float bass = FloatArgumentType.getFloat(context, "bass_percent");
+        ModUtils.CheckPlayerGroup result = checkPlayerGroup(context);
+        if (result == null) return 1;
+
+        SimpleVoiceChatMusic.SCHEDULED_EXECUTOR.execute(() -> {
+            GroupManager gm = MusicManager.getInstance().getGroup(result.group(), result.player().getServer());
+            gm.broadcast(Text.literal("Bassboost set to " + bass + "% by " + result.source().getName()));
+            gm.setBassBoost(bass);
+        });
+
+        return 0;
+    }
+
+}
