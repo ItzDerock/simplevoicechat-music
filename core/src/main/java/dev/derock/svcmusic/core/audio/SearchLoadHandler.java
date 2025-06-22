@@ -5,22 +5,21 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import dev.derock.svcmusic.core.SimpleVoiceChatMusic;
+import dev.derock.svcmusic.core.api.CommandSource;
+import dev.derock.svcmusic.core.translations.Translations;
 import dev.derock.svcmusic.core.util.ModUtils;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
-public class SearchLoadHandler implements AudioLoadResultHandler {
+import static com.fasterxml.jackson.databind.type.LogicalType.Map;
 
-    protected final ServerCommandSource source;
+public class SearchLoadHandler implements AudioLoadResultHandler {
+    protected final CommandSource source;
     protected final GroupManager group;
 
-    public SearchLoadHandler(ServerCommandSource source, GroupManager group) {
+    public SearchLoadHandler(CommandSource source, GroupManager group) {
         this.source = source;
         this.group = group;
     }
@@ -30,11 +29,15 @@ public class SearchLoadHandler implements AudioLoadResultHandler {
         group.enqueueSong(track);
 
         if (source != null) {
-            this.group.broadcast(
-                Text.literal("Enqueued ")
-                    .append(ModUtils.trackInfo(track.getInfo(), true))
-                    .append(" - ").append(Objects.requireNonNull(source.getPlayer()).getName())
-            );
+            // this.group.broadcast(
+            //     Text.literal("Enqueued ")
+            //         .append(ModUtils.trackInfo(track.getInfo(), true))
+            //         .append(" - ").append(Objects.requireNonNull(source.getPlayer()).getName())
+            // );
+
+            this.group.broadcast(Translations.load("song_enqueued", java.util.Map.of(
+                "song", ModUtils.trackInfo(track.getInfo(), true)
+            )));
         }
     }
 

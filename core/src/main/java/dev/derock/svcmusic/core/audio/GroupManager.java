@@ -10,6 +10,9 @@ import de.maxhenkel.voicechat.api.audiochannel.StaticAudioChannel;
 import dev.derock.svcmusic.core.SimpleVoiceChatMusic;
 import dev.derock.svcmusic.core.VoiceChatPlugin;
 import dev.derock.svcmusic.core.api.MinecraftServer;
+import dev.derock.svcmusic.core.api.ServerPlayer;
+import dev.derock.svcmusic.core.translations.RichText;
+import dev.derock.svcmusic.core.translations.Translations;
 
 import java.nio.ByteBuffer;
 import java.util.HashSet;
@@ -124,17 +127,21 @@ public class GroupManager {
 
             HashSet<UUID> uuids = new HashSet<>();
 
-            for (ServerPlayerEntity serverPlayer : server.getPlayerManager().getPlayerList()) {
-                VoicechatConnection playerConnection = VoiceChatPlugin.voicechatServerApi.getConnectionOf(serverPlayer.getUuid());
+            for (ServerPlayer serverPlayer : server.getPlayers()) {
+                UUID playerUniqueId = serverPlayer.getUniqueId();
+
+                VoicechatConnection playerConnection = VoiceChatPlugin
+                    .voicechatServerApi.getConnectionOf(playerUniqueId);
 
                 if (playerConnection == null || !playerConnection.isConnected()) continue;
+
                 Group playerGroup = playerConnection.getGroup();
                 if (playerGroup == null || playerGroup.getId() != this.group.getId()) continue;
 
-                uuids.add(serverPlayer.getUuid());
+                uuids.add(playerUniqueId);
 
                 connections.computeIfAbsent(
-                    serverPlayer.getUuid(),
+                    playerUniqueId,
                     (uuid) -> {
                         StaticAudioChannel channel = VoiceChatPlugin.voicechatServerApi.createStaticAudioChannel(
                             UUID.randomUUID(),
@@ -171,6 +178,11 @@ public class GroupManager {
         }, 0L, PLAYER_TRACK_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * Adds a song to the queue.
+     * @param track the track to enqueue
+     * @return true if the track was successfully enqueued, false if it was not.
+     */
     public boolean enqueueSong(AudioTrack track) {
         // noInterrupt true => false return if smth already playing
         //                     true return if nothing playing
@@ -181,10 +193,16 @@ public class GroupManager {
         return true;
     }
 
+    /**
+     * Returns the current queue.
+     */
     public BlockingQueue<AudioTrack> getQueue() {
         return queue;
     }
 
+    /**
+     * Skips the current song and starts the next one in the queue.
+     */
     public void nextTrack() {
         // ensure this happens in the correct thread
         this.executorService.execute(() -> {
@@ -203,32 +221,55 @@ public class GroupManager {
         });
     }
 
+    /**
+     * Returns the underlying lavaplayer instance
+     * @return the lavaplayer instance used by this group manager.
+     */
     public AudioPlayer getPlayer() {
         return this.lavaplayer;
     }
 
-    public void broadcast(MutableText text) {
+    /**
+     * Broadcasts a message to all players in this group.
+     * @param text the text to broadcast
+     */
+    public void broadcast(RichText text) {
         // execute on main thread
         server.execute(() -> {
-            ServerPlayerEntity[] players = server.getPlayerManager().getPlayerList().stream().filter(
-                (player) -> this.connections.containsKey(player.getUuid())
-            ).toArray(ServerPlayerEntity[]::new);
+            ServerPlayer[] players = server.getPlayers().stream().filter(
+                (player) -> this.connections.containsKey(player.getUniqueId())
+            ).toArray(ServerPlayer[]::new);
 
-            for (ServerPlayerEntity player : players) {
+            for (ServerPlayer player : players) {
                 player.sendMessage(text);
             }
         });
     }
 
+    /**
+     * Cleans up the instance, destroying all tasks.
+     */
     public void cleanup() {
-        this.broadcast(Text.literal("No more songs to play."));
-        if (this.audioFrameSendingTask != null) this.audioFrameSendingTask.cancel(true);
+        this.broadcast(Translations.load("no_more_songs"));
+
+        // stop all ongoing tasks
+        if (this.audioFrameSendingTask != null)
+            this.audioFrameSendingTask.cancel(false);
+
+        if (this.playerTrackingTask != null)
+            this.playerTrackingTask.cancel(false);
+
+        // clean up the lavaplayer instance
         this.lavaplayer.destroy();
+
         MusicManager.getInstance().deleteGroup(this.group);
-        if (this.playerTrackingTask != null) this.playerTrackingTask.cancel(false);
         this.executorService.shutdown();
     }
 
+    /**
+     * Sets the bass boost percentage.
+     * @param percentage the percentage to set the bass boost to.
+     */
     public void setBassBoost(float percentage) {
         this.settingsStore.bassboost = percentage;
         final float multiplier = percentage / 100.00f;
@@ -238,11 +279,19 @@ public class GroupManager {
         }
     }
 
+    /**
+     * Sets the volume of the player.
+     * @param volume the volume to set the player to.
+     */
     public void setVolume(int volume) {
         this.settingsStore.volume = volume;
         this.getPlayer().setVolume(volume);
     }
 
+    /**
+     * Returns the settings store for this group.
+     * @return the settings store for this group.
+     */
     public final GroupSettingsManager getSettingsStore() {
         return this.settingsStore;
     }

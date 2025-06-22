@@ -13,9 +13,19 @@ import org.jetbrains.annotations.Nullable;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class ModUtils {
+
+    public static Map<String, String> getTrackTranslationVariables(AudioTrackInfo track) {
+        return Map.of(
+            "track_link", track.uri,
+            "track_title", track.title,
+            "track_author", track.author,
+            "track_length",
+        )
+    }
 
     public static MutableText hyperlink(String string, String url) {
         return Text.literal(string)

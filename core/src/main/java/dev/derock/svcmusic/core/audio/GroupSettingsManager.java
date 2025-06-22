@@ -12,6 +12,10 @@ public class GroupSettingsManager {
     public int volume = 100;
 
     public static GroupSettingsManager getGroup(Group group) {
-        return GroupSettingsManager.settings.computeIfAbsent(group.getId(), (u) -> new GroupSettingsManager());
+        return GroupSettingsManager.settings
+            .computeIfAbsent(
+                group.getId(),
+                (u) -> new GroupSettingsManager()
+            );
     }
 }

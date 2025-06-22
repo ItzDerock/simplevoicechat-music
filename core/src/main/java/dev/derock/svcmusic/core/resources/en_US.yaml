@@ -1,0 +1,18 @@
+# Macros are reusable and can be referenced by {{macros.<macro name>}}
+# i.e., {{macros.format_track}} will be expanded before placeholders are processed.
+# the variables are inherited from where the macro is called from
+# Links should follow the following format: [link text](https://your.url.here)
+macros:
+  format_track: "&3[{{track_title}}]({{track.url}}) &fby &b{{track_author}}"
+
+# variables: none
+no_more_songs: "No more songs to play."
+
+# variables:
+#  - {{track_title}} -> song title
+#  - {{track_minutes}} -> the rounded down minutes of the track
+#  - {{track_seconds}} -> the track's seconds rounded to the nearest whole number
+#  - {{track_author}} -> the author of the track
+#  - {{track_url}} -> the track's url
+#  - {{player}} -> the player who requested this track
+song_enqueued: "Enqueued {{macros.format_track}} - {{player}}"

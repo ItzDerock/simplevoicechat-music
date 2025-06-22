@@ -10,4 +10,10 @@ public interface MinecraftServer {
    * Returns a list of online server players.
    */
   List<ServerPlayer> getPlayers();
+
+  /**
+   * Executes the given lambda on the server thread.
+   * @param func the function to execute
+   */
+  void execute(Runnable func);
 }
